@@ -1,21 +1,24 @@
 #!/usr/bin/env bash
-# Run wallsav after 30s of inactivity, stops with a single keypress
-
 IDLE_FILE="/tmp/.last_command_time.$$"
 date +%s >"$IDLE_FILE"
 
-# Update timer on command
-PROMPT_COMMAND='date +%s >"$IDLE_FILE"'
-
-while true; do
-  sleep 1
-  last=$(cat "$IDLE_FILE")
-  now=$(date +%s)
-  idle=$((now - last))
-  if ((idle >= 45)); then
-    # Launch wallsav in foreground, let it handle keypresses
-    ~/.local/bin/sav
-    # Reset idle timer after it finishes
+update_idle_file() {
     date +%s >"$IDLE_FILE"
-  fi
-done
+}
+
+idle_watcher() {
+    while true; do
+        sleep 1
+        last=$(cat "$IDLE_FILE")
+        now=$(date +%s)
+        idle=$((now - last))
+        if [ "$idle" -ge 45 ]; then
+            ~/.local/bin/sav
+            update_idle_file
+        fi
+    done
+}
+
+idle_watcher &
+
+trap update_idle_file DEBUG
