@@ -14,9 +14,7 @@ function idle_watcher
         set now (date +%s)
         set idle (math $now - $last)
         if test $idle -ge 45
-            # Run your program in foreground
             ~/.local/bin/sav
-            # Reset timer after it finishes
             update_idle_file
         end
     end
